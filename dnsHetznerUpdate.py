@@ -13,9 +13,6 @@ log_filename = ""
 
 # Funktion zum Laden der Konfiguration aus der JSON-Datei
 def load_config(filename):
-    global auth_api_Token
-    global named_directory
-    
     if not os.path.exists(filename):
         logging.error("Configuration file '{}' dosen't exist. Script will be stopped".format(filename))
         exit()
@@ -24,25 +21,29 @@ def load_config(filename):
         config = json.load(config_file)
         # Extrahiere die Werte aus der Konfiguration
         # directory to watch over
-        named_directory = config.get('directory', '/var/named')
+        directory = config.get('directory', '/var/named/')
         # Authentication Token for the Herzner API
-        auth_api_Token = config.get('apiToken', '')
+        api_token = config.get('apiToken', '')
+
+        return directory, api_token
 
 # Überprüfen, ob der Token noch vorhanden ist
-def check_auth_api_Token():
-    if auth_api_Token == "":
+def check_auth_api_Token(api_token):
+    if api_token == "":
         logging.error("Authentifizierungs-Token is missing. Script will be stopped")
         exit()
 
 # Überprüfe, ob das Verzeichnis existiert
-def check_directory():
-    global named_directory
-    
-    if not os.path.exists(named_directory):
+def check_directory(directory):    
+    if not os.path.exists(directory):
         logging.error("Directory '{}' dosen't exist. Script will be stopped".format(named_directory))
         exit()
 
 class MyHandler(FileSystemEventHandler):
+    def __init__(self, api_token):
+        super(MyHandler, self).__init__()
+        self.api_token = api_token
+
     def on_modified(self, event):
         if '.db' in event.src_path:
             domain    = self.get_domain(event.src_path)
@@ -83,7 +84,7 @@ class MyHandler(FileSystemEventHandler):
             response = requests.get(
                 url="https://dns.hetzner.com/api/v1/zones",
                 headers={
-                    "Auth-API-Token": auth_api_Token,
+                    "Auth-API-Token": self.api_token,
                 },
                 params={
                     "search_name": domain
@@ -111,7 +112,7 @@ class MyHandler(FileSystemEventHandler):
                 url="https://dns.hetzner.com/api/v1/zones",
                 headers={
                     "Content-Type": "application/json",
-                    "Auth-API-Token": auth_api_Token,
+                    "Auth-API-Token": self.api_token,
                 },
                 data=json.dumps({
                     "name": domain,
@@ -171,17 +172,17 @@ logging.basicConfig(filename=log_filename, level=logging.ERROR,
                     format='%(asctime)s - %(levelname)s: %(message)s')
 
  # Lade die Konfiguration aus der JSON-Datei
-load_config('/usr/local/bin/hetzerdns/config.json')
+named_directory, auth_api_Token = load_config('/usr/local/bin/hetzerdns/config.json')
 
 # Überprüfen ob der auth api token gesetzt ist
-check_auth_api_Token()
+check_auth_api_Token(auth_api_Token)
 
 # Überprüfe, ob das Verzeichnis existiert
-check_directory()
+check_directory(named_directory)
 
 # Einen Observer erstellen, der das Verzeichnis überwacht
 observer = Observer()
-observer.schedule(MyHandler(), path=named_directory, recursive=False)
+observer.schedule(MyHandler(auth_api_Token), path=named_directory, recursive=False)
 
 # Observer starten
 observer.start()
