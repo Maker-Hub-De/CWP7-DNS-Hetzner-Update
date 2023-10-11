@@ -2,20 +2,54 @@ import time
 import requests
 import os
 import json
+import logging
 
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 
-# directory to watch over
-directory_2_check = "/var/named"
-# Authentication Token for the Herzner API
-auth_api_Token    = "sTTXY4K3yTLvu3rLfJZxzeMAzCL02Gp1"
+named_directory = ""
+auth_api_Token = ""
+log_filename = ""
+
+# Funktion zum Laden der Konfiguration aus der JSON-Datei
+def load_config(filename):
+    global auth_api_Token
+    global named_directory
+    
+    if not os.path.exists(filename):
+        logging.error("Configuration file '{}' dosen't exist. Script will be stopped".format(filename))
+        exit()
+
+    with open(filename, 'r') as config_file:
+        config = json.load(config_file)
+        # Extrahiere die Werte aus der Konfiguration
+        # directory to watch over
+        named_directory = config.get('directory', '/var/named')
+        # Authentication Token for the Herzner API
+        auth_api_Token = config.get('apiToken', '')
+
+# Überprüfen, ob der Token noch vorhanden ist
+def check_auth_api_Token():
+    if auth_api_Token == "":
+        logging.error("Authentifizierungs-Token is missing. Script will be stopped")
+        exit()
+
+# Überprüfe, ob das Verzeichnis existiert
+def check_directory():
+    global named_directory
+    
+    if not os.path.exists(named_directory):
+        logging.error("Directory '{}' dosen't exist. Script will be stopped".format(named_directory))
+        exit()
 
 class MyHandler(FileSystemEventHandler):
     def on_modified(self, event):
         if '.db' in event.src_path:
             domain    = self.get_domain(event.src_path)
             file_name = self.get_file_name(event.src_path)
+
+            # Überprüfen ob der auth api token gesetzt ist
+            check_auth_api_Token()
 
             zone_id = self.get_zone_id(domain)
 
@@ -45,7 +79,6 @@ class MyHandler(FileSystemEventHandler):
         return domain
 
     def get_zone_id(self, domain):
-        print("searching zone")
         try:
             response = requests.get(
                 url="https://dns.hetzner.com/api/v1/zones",
@@ -59,12 +92,14 @@ class MyHandler(FileSystemEventHandler):
 
             if response.status_code == 200:
                 # JSON-Daten analysieren
+                print(response.content)
                 json_object = json.loads(response.content)
 
                 # Zone-ID abrufen
                 zone_id = json_object["zones"][0]["id"]
                 return zone_id
             elif response.status_code == 404:
+                print(response.content)
                 return ""
         except requests.exceptions.RequestException:
                 return ""
@@ -85,6 +120,7 @@ class MyHandler(FileSystemEventHandler):
             )
 
             if response.status_code == 200:
+                print(response.content)
                 # JSON-Daten analysieren
                 json_object = json.loads(response.content)
 
@@ -103,7 +139,7 @@ class MyHandler(FileSystemEventHandler):
                 return ""
 
     def update_zone_from_file(self, zone_id, domain, file_name):
-        print("update_zone_from_file") 
+        print("update_zone_from_file")
         # HTTP-Anforderung senden, um die geänderte Datei zu übertragen
         with open(file_name, 'rb') as file:
 
@@ -126,11 +162,26 @@ class MyHandler(FileSystemEventHandler):
             except requests.exceptions.RequestException:
                 print('HTTP Request failed')
 
-#####################################################################
 # Ab hier beginnt der Hauptteil
+
+# Initialisiere das Logging
+log_filename = time.strftime("/usr/local/bin/hetzerdns/%Y-%m.hetznerDnsUpdate.log")
+
+logging.basicConfig(filename=log_filename, level=logging.ERROR,
+                    format='%(asctime)s - %(levelname)s: %(message)s')
+
+ # Lade die Konfiguration aus der JSON-Datei
+load_config('/usr/local/bin/hetzerdns/config.json')
+
+# Überprüfen ob der auth api token gesetzt ist
+check_auth_api_Token()
+
+# Überprüfe, ob das Verzeichnis existiert
+check_directory()
+
 # Einen Observer erstellen, der das Verzeichnis überwacht
 observer = Observer()
-observer.schedule(MyHandler(), path=directory_2_check, recursive=False)
+observer.schedule(MyHandler(), path=named_directory, recursive=False)
 
 # Observer starten
 observer.start()
