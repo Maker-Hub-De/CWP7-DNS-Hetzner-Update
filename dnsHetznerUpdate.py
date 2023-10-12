@@ -16,14 +16,14 @@ class HeznerDNS:
         # Use an absolute path to the SQLite database file
         self.auth_api_token = auth_api_token
         self.logging = logging
-        
+
     def get_domain(self, file_name):
         # Extract the domain name from the file name by removing the '.db' extension
         domain, _ = os.path.splitext(file_name)
-        
+
         # In case there's a path, extract the last part
-        domain = domain.split('/.')[-1]  
-        
+        domain = domain.split('/.')[-1]
+
         #domain = file_name.rsplit('.db', 1)[0]
         #domain = domain.rsplit('/.', 1)[1]
         return domain
@@ -41,7 +41,7 @@ class HeznerDNS:
             )
 
             if response.status_code == 200: # Successful response
-                # Parse JSON data    
+                # Parse JSON data
                 try:
                     json_object = json.loads(response.content)
                 except json.JSONDecodeError as e:
@@ -79,10 +79,10 @@ class HeznerDNS:
                     logging.error(f"Coundn't get the new zone id")
                     logging.error(f"Error decoding JSON: {str(e)}")
                     return None
-                    
+
                 # Retrieve the zone ID
                 zone_id = json_object["zone"]["id"]
-                
+
             elif response.status_code in [401, 404, 406]:  # Unauthorized, not found, Not acceptable
                 return None
             elif response.status_code == 422: # Unprocessable entity
@@ -110,10 +110,18 @@ class HeznerDNS:
                 return False
         except requests.exceptions.RequestException:
             return False
-    
-    def update_zone_from_file(self, zone_id, domain, file_name):
+
+    def update_zone_from_file(self, zone_id, domain, file_path):
+        # Use an absolute path to the file
+        file_path = os.path.abspath(file_path)
+        
+        if not os.path.exists(file_path):
+            logging.error(f"File {file_path} not found.")
+            return False
+                
         # Send an HTTP request to transmit the modified file
-        with open(file_name, 'rb') as file:
+        print(f"Open file {file_path} for read")
+        with open(file_path, 'rb') as file:
 
             # Read bytes from the file and convert it to a string
             file_content = file.read().decode('utf-8')
@@ -129,7 +137,7 @@ class HeznerDNS:
                     },
                     data=request_data
                 )
-                
+
                 if response.status_code in [200, 201]:  # Successful response, Create
                     print(response.content)
                     return True
@@ -178,7 +186,8 @@ class DBManager:
                     cursor.execute('''
                         CREATE TABLE file_info (
                             filename TEXT PRIMARY KEY,
-                            last_checked DATETIME
+                            last_modified INTEGER,
+                            last_checked INTEGER
                         )
                     ''')
                     conn.commit()
@@ -188,11 +197,11 @@ class DBManager:
         except sqlite3.Error as e:
             self.logging.error(f"Error creating table: {str(e)}")
 
-    def insert_file_info(self, filename, last_checked):
+    def insert_file_info(self, filename, last_modified, last_checked):
         try:
             conn = sqlite3.connect(self.db_filename)
             cursor = conn.cursor()
-            cursor.execute("INSERT INTO file_info (filename, last_checked) VALUES (?, ?)", (filename, last_checked))
+            cursor.execute("INSERT INTO file_info (filename, last_modified, last_checked) VALUES (?, ?, ?)", (filename, last_modified, last_checked))
             conn.commit()
             conn.close()
             return True
@@ -200,11 +209,11 @@ class DBManager:
             self.logging.error(f"Error inserting file info: {str(e)}")
             return False
 
-    def update_file_info(self, filename, last_checked):
+    def update_file_info(self, filename, last_modified, last_checked):
         try:
             conn = sqlite3.connect(self.db_filename)
             cursor = conn.cursor()
-            cursor.execute("UPDATE file_info SET last_checked = ? WHERE filename = ?", (last_checked, filename))
+            cursor.execute("UPDATE file_info SET last_modified = ?, last_checked = ? WHERE filename = ?", (last_modified, last_checked, filename))
             conn.commit()
             conn.close()
             return True
@@ -228,13 +237,16 @@ class DBManager:
         try:
             conn = sqlite3.connect(self.db_filename)
             cursor = conn.cursor()
-            cursor.execute("SELECT last_checked FROM file_info WHERE filename = ?", (filename,))
-            last_checked = cursor.fetchone()
+            cursor.execute("SELECT last_modified, last_checked FROM file_info WHERE filename = ?", (filename,))
+            resault = cursor.fetchone()
             conn.close()
-            return last_checked[0] if last_checked else None
+            if resault:
+                return resault[0], resault[1] 
+            else:
+                return None, None
         except sqlite3.Error as e:
             self.logging.error(f"Error getting file info: {str(e)}")
-            return None
+            return None, None
 
     def get_files_not_checked_since(self, since_datetime):
         try:
@@ -248,84 +260,125 @@ class DBManager:
             self.logging.error(f"Error getting files not checked since: {str(e)}")
             return []
 
-    class MyObserverHandler(FileSystemEventHandler):
-        def __init__(self, db_manager, auth_api_token, logging, directory):
-            super(MyObserverHandler, self).__init__()
-            self.db_manager = db_manager
-            self.auth_api_token = auth_api_token
-            self.logging = logging
-            self.directory = directory
-            
-        def on_modified(self, event):
-            current_check_time = datetime.now()
-            hezner_dns = HeznerDNS(self.auth_api_token, logging)
-            
-            files_on_disk = [f for f in os.listdir(self.directory) if f.endswith('.db')]
-            for file_name in files_on_disk:
-                last_modified = datetime.fromtimestamp(os.path.getmtime(os.path.join(self.directory, file_name)))
-                last_checked = self.db_manager.get_file_info(file_name)
+class MyObserverHandler(FileSystemEventHandler):
+    def __init__(self, db_manager, auth_api_token, logging, directory):
+        super(MyObserverHandler, self).__init__()
+        self.db_manager = db_manager
+        self.auth_api_token = auth_api_token
+        self.logging = logging
+        self.directory = directory
 
-                if last_checked == None: # No entry found; it could be a new zone
-                    domain = hezner_dns.get_domain(file_name)
-                    # Try to get a zone ID; the zone may already exist
-                    zone_id = hezner_dns.get_zone_id(domain)
-                    if zone_id == None:  # We don't have an existing zone 
-                        domain = hezner_dns.create_zone(domain)
-                    if zone_id == None: # Now we schould have a zone id; if not go on
-                        logging.error("Could not create a new zone")
-                        continue  # Continue to the next file
-                            
-                    # Updating the zone data
-                    hezner_dns.update_zone_from_file(zone_id, domain, file_name)
-                    # Insert into the database
-                    self.db_manager.insert_file_info(file_name, current_check_time)
-                        
-                elif last_modified > last_checked           # changes that younger then last check
-                and  last_checked < current_check_time - 2: # the last check scould be at least 2 seconds in the past
-                    # Found a changed file
-                    domain = hezner_dns.get_domain(file_name)
-                    # Try to get a zone ID; the zone may already exist
-                    zone_id = hezner_dns.get_zone_id(domain)
-                    if zone_id == None: # Now we schould have a zone id; if not go on
-                        domain = hezner_dns.create_zone(domain)
-                        
-                    if zone_id == None: # Now we need to have a zone_id
-                        logging.error("Could not create new zone")
-                        continue # Continue to the next file
-                        
-                    # Updating the zone data
-                    hezner_dns.update_zone_from_file(zone_id, domain, file_name)
-                    # Updating the database
-                    if self.db_manager.update_file_info(file_name, current_check_time) == False:
-                        logging.error("Could not update file {file_name} in datagbase.")
-                        continue # Continue to the next file
-                        
-                else:
-                    # Just update the check time
-                    if self.db_manager.update_file_info(file_name, current_check_time) == False:
-                        logging.error("Could not update file {file_name} in datagbase.")
-                        continue # Continue to the next file
+    def on_modified(self, event):
+        if event.is_directory:
+         return
+         
+        current_check_time = datetime.now().timestamp()
+        hezner_dns = HeznerDNS(self.auth_api_token, logging)
+
+        file_list = os.listdir(self.directory)
+        for file_name in file_list:
+            # Use an absolute path to the file
+            file_path = os.path.abspath(os.path.join(self.directory, file_name))
+            
+            if not file_name.endswith('.db') \
+            or not os.path.isfile(file_path) \
+            or file_name == "hydrogen.ns.hetzner.com.db" \
+            or file_name == "oxygen.ns.hetzner.com.db"\
+            or file_name == "helium.ns.hetzner.com.db":
+                # File/directory is not relevant; Dosen't need a log entry
+                continue
+            
+            if not os.path.exists(file_path):
+                logging.error(f"File {file_path} not found.")
+                continue
+
+            last_modified_file = int(os.path.getmtime(file_path))
+            last_modified_db, last_checked = self.db_manager.get_file_info(file_name)
+
+            print(f"Änderung Datei: {last_modified_file}")
+            print(f"Änderung db: {last_modified_db}")
+            print(f"Check db: {last_checked}")
+
+            if last_modified_db == last_modified_file:
+                # Just update the check time
+                print("Just update the check time")
+                if not self.db_manager.update_file_info(file_name, last_modified_file, current_check_time):
+                    logging.error("Could not update file {file_name} in datagbase.")
+                    continue # Continue to the next file
                     
-            # Now checking the files in the database which weren't updated
-            # That could happen if the file was deleted
-            # First, get all relevant files
-            files_in_db = self.db_manager.get_files_not_checked_since(current_check_time)
-            for file_name in files_in_db:
-                # Check if the file still exists on the file system
-                if not os.path.exists(os.path.join(self.directory, file_name)):
-                    # File was deleted
-                    domain = hezner_dns.get_domain(file_name)
-                    zone_id = hezner_dns.get_zone_id(domain)
-                    if zone_id:
-                         # We have to delete the zone
-                        if hezner_dns.delete_zone(domain) == False:
-                            logging.error(f"Could not delete zone {domain} from Hetzner DNS.")
-                            continue  # Continue to the next file
-                         if self.db_manager.delete_file_info(file_name) == False:
-                            logging.error(f"Could not delete file {file_name} from database.")
-                            continue  # Continue to the next file
-                            
-                        
+            if last_checked == None: # No entry found; it could be a new zone
+                print("No entry found; it could be a new zone")
+                domain = hezner_dns.get_domain(file_name)
+                # Try to get a zone ID; the zone may already exist
+                zone_id = hezner_dns.get_zone_id(domain)
+                if zone_id == None:  # We don't have an existing zone
+                    domain = hezner_dns.create_zone(domain)
+                if zone_id == None: # Now we schould have a zone id; if not go on
+                    logging.error("Could not create a new zone")
+                    continue  # Continue to the next file
+
+                # Updating the zone data
+                hezner_dns.update_zone_from_file(zone_id, domain, file_path)
+                # Insert into the database
+                self.db_manager.insert_file_info(file_name, current_check_time)
+            # changes that younger then last check and the last check scould be at least 2 seconds in the past   
+            elif last_modified_file > last_checked \
+            and  last_modified_file != last_modified_db \
+            and  last_checked < current_check_time - 2:
+                print("Found a changed file")            
+                # Found a changed file
+                domain = hezner_dns.get_domain(file_name)
+                # Try to get a zone ID; the zone may already exist
+                zone_id = hezner_dns.get_zone_id(domain)
+                if zone_id == None: # Now we schould have a zone id; if not go on
+                    domain = hezner_dns.create_zone(domain)
+
+                if zone_id == None: # Now we need to have a zone_id
+                    logging.error("Could not create new zone")
+                    continue # Continue to the next file
+
+                # Updating the zone data
+                hezner_dns.update_zone_from_file(zone_id, domain, file_name)
+                # Updating the database
+                if not self.db_manager.update_file_info(file_name, last_modified_file, current_check_time):
+                    logging.error("Could not update file {file_name} in datagbase.")
+                    continue # Continue to the next file
+
+            else:
+                # Just update the check time
+                print("Just update the check time")      
+                if not self.db_manager.update_file_info(file_name, last_modified_file, current_check_time):
+                    logging.error("Could not update file {file_name} in datagbase.")
+                    continue # Continue to the next file
+
+        # Now checking the files in the database which weren't updated
+        # That could happen if the file was deleted
+        # First, get all relevant files
+        files_in_db = self.db_manager.get_files_not_checked_since(current_check_time)
+        
+        if not files_in_db:
+            return
+        
+        for file_name in files_in_db:
+            # Use an absolute path to the file
+            print(file_name[0])
+            file_path = os.path.abspath(os.path.join(self.directory, file_name[0]))
+                           
+            # Check if the file still exists on the file system
+            if not os.path.exists(file_path):
+            
+                # File was deleted
+                domain = hezner_dns.get_domain(file_name)
+                zone_id = hezner_dns.get_zone_id(domain)
+                if zone_id:
+                     # We have to delete the zone
+                    if not hezner_dns.delete_zone(domain):
+                        logging.error(f"Could not delete zone {domain} from Hetzner DNS.")
+                        continue  # Continue to the next file
+                    if not self.db_manager.delete_file_info(file_name):
+                        logging.error(f"Could not delete file {file_name} from database.")
+                        continue  # Continue to the next file
+
 # Function to load the configuration from the JSON file
 def load_config(filename, logging):
     if not os.path.exists(filename):
@@ -345,7 +398,7 @@ def load_config(filename, logging):
     except json.JSONDecodeError as e:
         logging.error(f"Error loading configuration: {str(e)}")
         exit()
-        
+
 # Check if the authentication API token is present
 def check_auth_api_token(api_token):
     if api_token == "":
@@ -353,7 +406,7 @@ def check_auth_api_token(api_token):
         exit()
 
 # Check if the directory exists
-def check_directory(named_directory):    
+def check_directory(named_directory):
     if not os.path.exists(named_directory):
         logging.error("Directory '{}' dosen't exist. Script will be stopped".format(named_directory))
         exit()
@@ -378,7 +431,7 @@ if __name__ == "__main__":
 
     # Check if the directory exists
     check_directory(named_directory)
-        
+
     # Create an instance of the DBManager class with the file path to the database
     db_file_path = os.path.join(script_directory, 'file_info.db')  # Pfad zur Datenbankdatei im Skriptverzeichnis
 
@@ -402,8 +455,3 @@ if __name__ == "__main__":
         observer.stop()
         # Wait until the Observer is fully stopped
         observer.join()
-
-# Stop the Observer
-observer.stop()
-# Wait until the Observer is fully stopped
-observer.join()
