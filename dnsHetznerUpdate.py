@@ -261,17 +261,21 @@ class DBManager:
             return []
 
 class MyObserverHandler(FileSystemEventHandler):
-    def __init__(self, db_manager, auth_api_token, logging, directory):
+    def __init__(self, db_manager, auth_api_token, logging, directory, observer):
         super(MyObserverHandler, self).__init__()
         self.db_manager = db_manager
         self.auth_api_token = auth_api_token
         self.logging = logging
         self.directory = directory
+        self.observer = observer
 
     def on_modified(self, event):
         if event.is_directory:
          return
-         
+
+        # Stop the observer temporarily
+        self.observer.unschedule_all()
+
         current_check_time = datetime.now().timestamp()
         hezner_dns = HeznerDNS(self.auth_api_token, logging)
 
@@ -379,6 +383,9 @@ class MyObserverHandler(FileSystemEventHandler):
                         logging.error(f"Could not delete file {file_name} from database.")
                         continue  # Continue to the next file
 
+        # Start the observer again
+        self.observer.schedule(self, path=self.directory, recursive=False)
+        
 # Function to load the configuration from the JSON file
 def load_config(filename, logging):
     if not os.path.exists(filename):
@@ -442,7 +449,7 @@ if __name__ == "__main__":
 
     # Create an Observer that monitors the directory
     observer = Observer()
-    observer.schedule(MyObserverHandler(db_manager, auth_api_token, logging, named_directory), path=named_directory, recursive=False)
+    observer.schedule(MyObserverHandler(db_manager, auth_api_token, logging, named_directory, observer), path=named_directory, recursive=False)
 
     # Start the Observer
     observer.start()
