@@ -17,7 +17,7 @@ fi
 sudo mkdir -p /usr/local/bin/hetzerdns/
 
 # Download files from GitHub
-wget -O /usr/local/bin/hetzerdns/dnsUpdate.py https://github.com/Maker-Hub-De/CWP7-DNS-Hetzner-Update/raw/main/dnsHetznerUpdate.py
+wget -O /usr/local/bin/hetzerdns/dns_hetzner_update.py https://github.com/Maker-Hub-De/CWP7-DNS-Hetzner-Update/raw/main/dns_hetzner_update.py
 wget -O /usr/local/cwpsrv/htdocs/resources/admin/modules/dns_hetzner_update.php https://github.com/Maker-Hub-De/CWP7-DNS-Hetzner-Update/raw/main/dns_hetzner_update.php
 wget -O /etc/systemd/system/hetzerDnsUpdate.service https://github.com/Maker-Hub-De/CWP7-DNS-Hetzner-Update/raw/main/hetzerDnsUpdate.service
 wget -O /usr/local/bin/hetzerdns/db_manager.py.py https://raw.githubusercontent.com/Maker-Hub-De/CWP7-DNS-Hetzner-Update/main/modules/db_manager.py
