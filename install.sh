@@ -1,5 +1,4 @@
 #!/bin/bash
-
 echo "Installing Addon: Update DNS zone data on Hetzner name server via API"
 
 # Check if wget is installed; if not, install it
