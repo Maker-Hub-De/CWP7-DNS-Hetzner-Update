@@ -33,7 +33,7 @@ if ! grep -q "$menu_entry" /usr/local/cwpsrv/htdocs/resources/admin/include/3rdp
 fi
 
 # Set permissions to execute file
-chmod +x /usr/local/bin/hetzerdns/dnsUpdate.py
+chmod +x /usr/local/bin/hetzerdns/hetzerDnsUpdate.py
 
 # Enable and start the new systemd service
 sudo systemctl enable hetzerDnsUpdate.service
