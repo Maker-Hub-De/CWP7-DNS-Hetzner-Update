@@ -13,6 +13,7 @@ if ! command -v watchdog &> /dev/null; then
   echo "Watchdog is not installed. Installing it."
   sudo dnf install python3-watchdog -y
 fi
+
 # Creating directory
 sudo mkdir -p /usr/local/bin/hetzerdns/
 
@@ -20,6 +21,9 @@ sudo mkdir -p /usr/local/bin/hetzerdns/
 wget -O /usr/local/bin/hetzerdns/dnsUpdate.py https://github.com/Maker-Hub-De/CWP7-DNS-Hetzner-Update/raw/main/dnsHetznerUpdate.py
 wget -O /usr/local/cwpsrv/htdocs/resources/admin/modules/dns_hetzner_update.php https://github.com/Maker-Hub-De/CWP7-DNS-Hetzner-Update/raw/main/dns_hetzner_update.php
 wget -O /etc/systemd/system/hetzerDnsUpdate.service https://github.com/Maker-Hub-De/CWP7-DNS-Hetzner-Update/raw/main/hetzerDnsUpdate.service
+wget -O /usr/local/bin/hetzerdns/DBManager.py https://github.com/Maker-Hub-De/CWP7-DNS-Hetzner-Update/raw/main/DBManager.py
+wget -O /usr/local/bin/hetzerdns/HeznerDNS.py https://github.com/Maker-Hub-De/CWP7-DNS-Hetzner-Update/raw/main/HeznerDNS.py
+wget -O /usr/local/bin/hetzerdns/observer_handler.py https://github.com/Maker-Hub-De/CWP7-DNS-Hetzner-Update/raw/main/observer_handler.py
 
 # Check and add menu entry to 3rdparty.php
 menu_entry='<li><a href="index.php?module=dns_hetzner_update"><span class="icon16 icomoon-icon-arrow-right-3"></span>Hetzner DNS Zone update</a></li>'
