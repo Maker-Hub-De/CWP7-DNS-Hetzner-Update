@@ -23,6 +23,7 @@ wget -O /etc/systemd/system/hetzerDnsUpdate.service https://github.com/Maker-Hub
 wget -O /usr/local/bin/hetzerdns/db_manager.py.py https://raw.githubusercontent.com/Maker-Hub-De/CWP7-DNS-Hetzner-Update/main/modules/db_manager.py
 wget -O /usr/local/bin/hetzerdns/hezner_dns.py https://raw.githubusercontent.com/Maker-Hub-De/CWP7-DNS-Hetzner-Update/main/modules/hezner_dns.py
 wget -O /usr/local/bin/hetzerdns/observer_handler.py https://raw.githubusercontent.com/Maker-Hub-De/CWP7-DNS-Hetzner-Update/main/modules/observer_handler.py
+
 # Check and add menu entry to 3rdparty.php
 menu_entry='<li><a href="index.php?module=dns_hetzner_update"><span class="icon16 icomoon-icon-arrow-right-3"></span>Hetzner DNS Zone update</a></li>'
 if ! grep -q "$menu_entry" /usr/local/cwpsrv/htdocs/resources/admin/include/3rdparty.php; then
