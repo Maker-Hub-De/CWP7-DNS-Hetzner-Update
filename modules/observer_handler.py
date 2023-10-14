@@ -16,7 +16,7 @@ from modules.hetzner_dns import HetznerDNS
 
 class ObserverHandler(FileSystemEventHandler):
     def __init__(self, db_manager, auth_api_token, directory, observer, logger=None):
-        super(MyObserverHandler, self).__init__()
+        super(ObserverHandler, self).__init__()
         self.db_manager = db_manager
         self.auth_api_token = auth_api_token
         self.directory = directory
