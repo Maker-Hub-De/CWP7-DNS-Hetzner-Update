@@ -45,8 +45,8 @@ class HetznerDNS:
                 try:
                     json_object = json.loads(response.content)
                 except json.JSONDecodeError as e:
-                    logging.error(f"Couldn't get the new zone id")
-                    logging.error(f"Error decoding JSON: {str(e)}")
+                    self.logger.error(f"Couldn't get the new zone id")
+                    self.logger.error(f"Error decoding JSON: {str(e)}")
                     return None
 
                 # Retrieve the zone ID
@@ -76,8 +76,8 @@ class HetznerDNS:
                 try:
                     json_object = json.loads(response.content)
                 except json.JSONDecodeError as e:
-                    logging.error(f"Coundn't get the new zone id")
-                    logging.error(f"Error decoding JSON: {str(e)}")
+                    self.logger.error(f"Coundn't get the new zone id")
+                    self.logger.error(f"Error decoding JSON: {str(e)}")
                     return None
 
                 # Retrieve the zone ID
@@ -116,7 +116,7 @@ class HetznerDNS:
         file_path = os.path.abspath(file_path)
         
         if not os.path.exists(file_path):
-            logging.error(f"File {file_path} not found.")
+            self.logger.error(f"File {file_path} not found.")
             return False
                 
         # Send an HTTP request to transmit the modified file
