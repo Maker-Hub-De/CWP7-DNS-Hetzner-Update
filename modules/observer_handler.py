@@ -13,7 +13,7 @@ import logging
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 
-class MyObserverHandler(FileSystemEventHandler):
+class ObserverHandler(FileSystemEventHandler):
     def __init__(self, db_manager, auth_api_token, directory, observer, logger=None):
         super(MyObserverHandler, self).__init__()
         self.db_manager = db_manager
