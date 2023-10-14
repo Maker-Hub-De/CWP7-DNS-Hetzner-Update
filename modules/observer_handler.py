@@ -29,7 +29,7 @@ class MyObserverHandler(FileSystemEventHandler):
         self.observer.unschedule_all()
 
         current_check_time = datetime.now().timestamp()
-        hezner_dns = HeznerDNS(self.auth_api_token, logging)
+        hezner_dns = HeznerDNS(self.auth_api_token)
 
         file_list = os.listdir(self.directory)
         for file_name in file_list:
@@ -45,7 +45,7 @@ class MyObserverHandler(FileSystemEventHandler):
                 continue
             
             if not os.path.exists(file_path):
-                logging.error(f"File {file_path} not found.")
+                self.logger.error(f"File {file_path} not found.")
                 continue
 
             last_modified_file = int(os.path.getmtime(file_path))
@@ -59,7 +59,7 @@ class MyObserverHandler(FileSystemEventHandler):
                 # Just update the check time
                 print("Just update the check time")
                 if not self.db_manager.update_file_info(file_name, last_modified_file, current_check_time):
-                    logging.error("Could not update file {file_name} in datagbase.")
+                    self.logger.error("Could not update file {file_name} in datagbase.")
                     continue # Continue to the next file
                     
             if last_checked == None: # No entry found; it could be a new zone
@@ -70,7 +70,7 @@ class MyObserverHandler(FileSystemEventHandler):
                 if zone_id == None:  # We don't have an existing zone
                     domain = hezner_dns.create_zone(domain)
                 if zone_id == None: # Now we schould have a zone id; if not go on
-                    logging.error("Could not create a new zone")
+                    self.logger.error("Could not create a new zone")
                     continue  # Continue to the next file
 
                 # Updating the zone data
@@ -90,21 +90,21 @@ class MyObserverHandler(FileSystemEventHandler):
                     domain = hezner_dns.create_zone(domain)
 
                 if zone_id == None: # Now we need to have a zone_id
-                    logging.error("Could not create new zone")
+                    self.logger.error("Could not create new zone")
                     continue # Continue to the next file
 
                 # Updating the zone data
                 hezner_dns.update_zone_from_file(zone_id, domain, file_name)
                 # Updating the database
                 if not self.db_manager.update_file_info(file_name, last_modified_file, current_check_time):
-                    logging.error("Could not update file {file_name} in datagbase.")
+                    self.logger.error("Could not update file {file_name} in datagbase.")
                     continue # Continue to the next file
 
             else:
                 # Just update the check time
                 print("Just update the check time")      
                 if not self.db_manager.update_file_info(file_name, last_modified_file, current_check_time):
-                    logging.error("Could not update file {file_name} in datagbase.")
+                    self.logger.error("Could not update file {file_name} in datagbase.")
                     continue # Continue to the next file
 
         # Now checking the files in the database which weren't updated
@@ -129,10 +129,10 @@ class MyObserverHandler(FileSystemEventHandler):
                 if zone_id:
                      # We have to delete the zone
                     if not hezner_dns.delete_zone(domain):
-                        logging.error(f"Could not delete zone {domain} from Hetzner DNS.")
+                        self.logger.error(f"Could not delete zone {domain} from Hetzner DNS.")
                         continue  # Continue to the next file
                     if not self.db_manager.delete_file_info(file_name):
-                        logging.error(f"Could not delete file {file_name} from database.")
+                        self.logger.error(f"Could not delete file {file_name} from database.")
                         continue  # Continue to the next file
 
         # Start the observer again
