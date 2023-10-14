@@ -12,7 +12,7 @@ import logging
 from datetime import datetime
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
-from modules import hetzner_dns
+from modules.hetzner_dns import HetznerDNS
 
 class ObserverHandler(FileSystemEventHandler):
     def __init__(self, db_manager, auth_api_token, directory, observer, logger=None):
