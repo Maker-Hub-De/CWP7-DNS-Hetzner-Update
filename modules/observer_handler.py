@@ -10,6 +10,7 @@ __date__       = "12.10.2023"
 
 import logging
 
+from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 
 class MyObserverHandler(FileSystemEventHandler):
