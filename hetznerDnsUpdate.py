@@ -120,7 +120,10 @@ if __name__ == "__main__":
     my_db_manager.create_table()
     
     # Configure and start the observer
-    my_observer.schedule(ObserverHandler(my_db_manager, auth_api_token, named_directory, my_observer), path=named_directory, recursive=False)
+    my_observer_handler = ObserverHandler(my_db_manager, auth_api_token, named_directory, my_observer)
+    my_observer.schedule(my_observer_handler, path=named_directory, recursive=False)
+    
+    # my_observer.schedule(ObserverHandler(my_db_manager, auth_api_token, named_directory, my_observer), path=named_directory, recursive=False)
     my_observer.start()
     observer_started = True
 
