@@ -16,7 +16,7 @@ class DBManager:
     def __init__(self, db_filename, logger=None):
         # Use an absolute path to the SQLite database file
         self.db_filename = os.path.abspath(db_filename)
-         self.logger = logger if logger else logging.getLogger("DBManager")
+        self.logger = logger if logger else logging.getLogger("DBManager")
 
         # Check if the database file already exists; if not, create it
         if not os.path.exists(self.db_filename):
