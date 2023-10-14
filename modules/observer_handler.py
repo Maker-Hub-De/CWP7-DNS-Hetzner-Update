@@ -13,13 +13,13 @@ import logging
 from watchdog.events import FileSystemEventHandler
 
 class MyObserverHandler(FileSystemEventHandler):
-    def __init__(self, db_manager, auth_api_token, directory, observer):
+    def __init__(self, db_manager, auth_api_token, directory, observer, logger=None):
         super(MyObserverHandler, self).__init__()
         self.db_manager = db_manager
         self.auth_api_token = auth_api_token
-        self.logger = logging.getLogger("MyObserverHandler")
         self.directory = directory
         self.observer = observer
+        self.logger = logger if logger else logging.getLogger("MyObserverHandler")
 
     def on_modified(self, event):
         if event.is_directory:
