@@ -18,7 +18,7 @@ import atexit
 import json
 from watchdog.observers import Observer
 from modules import db_manager
-from modules import hezner_dns
+from modules import hetzner_dns
 from modules import observer_handler
 
 # Function to load the configuration from the JSON file
