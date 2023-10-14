@@ -18,7 +18,7 @@ import atexit
 import json
 from watchdog.observers import Observer
 from modules.db_manager import DBManager
-from from modules.observer_handler import ObserverHandler
+from modules.observer_handler import ObserverHandler
 
 observer_started = False
 
