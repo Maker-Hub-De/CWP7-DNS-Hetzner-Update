@@ -10,7 +10,7 @@ __date__       = "12.10.2023"
 
 import os
 import sqlite3
-
+import logging
 
 class DBManager:
     def __init__(self, db_filename):
