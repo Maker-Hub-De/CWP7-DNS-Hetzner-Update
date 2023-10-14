@@ -86,7 +86,7 @@ if __name__ == "__main__":
         fcntl.lockf(lock_file, fcntl.LOCK_EX | fcntl.LOCK_NB)
     except IOError:
          my_logger.error("Another instance is already running.")
-        sys.exit(1)
+         sys.exit(1)
 
     # Create an Observer that monitors the directory
     my_observer = Observer()
