@@ -21,6 +21,8 @@ from modules import db_manager
 from modules import hetzner_dns
 from modules import observer_handler
 
+observer_started = False
+
 # Function to load the configuration from the JSON file
 def load_config(filename, logger=None):
     my_logger = logger if logger else logging.getLogger("hetznerDnsUpdate")
@@ -68,8 +70,10 @@ def remove_lock_file(lock_file, logger=None):
         my_logger.error(f"Erro during deleten lock file: {str(e)}")
 
 def stop_observer(observer):
-    observer.stop()
-    observer.join()
+    global observer_started
+    if observer_started:
+        my_observer.stop()
+        my_observer.join()
 
 # The main part starts here
 if __name__ == "__main__":
@@ -118,6 +122,7 @@ if __name__ == "__main__":
     # Configure and start the observer
     my_observer.schedule(MyObserverHandler(my_db_manager, auth_api_token, named_directory, my_observer), path=named_directory, recursive=False)
     my_observer.start()
+    observer_started = True
 
     try:
         while True:
