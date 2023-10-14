@@ -14,14 +14,14 @@ if ! command -v watchdog &> /dev/null; then
 fi
 
 # Creating directory
-sudo mkdir -p /usr/local/bin/hetzerdns/
-sudo mkdir -p /usr/local/bin/hetzerdns/modules/
+sudo mkdir -p /usr/local/bin/hetznerdns/
+sudo mkdir -p /usr/local/bin/hetznerdns/modules/
 
 # Download python program from GitHub
-wget -O /usr/local/bin/hetznerdns/hetznerDnsUpdate.py                          https://github.com/Maker-Hub-De/CWP7-DNS-Hetzner-Update/raw/main/hetzerDnsUpdate.py
+wget -O /usr/local/bin/hetznerdns/hetznerDnsUpdate.py                          https://github.com/Maker-Hub-De/CWP7-DNS-Hetzner-Update/raw/main/hetznerDnsUpdate.py
 wget -O /usr/local/bin/hetznerdns/modules/__init__.py                        https://raw.githubusercontent.com/Maker-Hub-De/CWP7-DNS-Hetzner-Update/main/modules/__init__.py
 wget -O /usr/local/bin/hetznerdns/modules/db_manager.py                       https://raw.githubusercontent.com/Maker-Hub-De/CWP7-DNS-Hetzner-Update/main/modules/db_manager.py
-wget -O /usr/local/bin/hetznerdns/modules/hezner_dns.py                       https://raw.githubusercontent.com/Maker-Hub-De/CWP7-DNS-Hetzner-Update/main/modules/hezner_dns.py
+wget -O /usr/local/bin/hetznerdns/modules/hezner_dns.py                       https://raw.githubusercontent.com/Maker-Hub-De/CWP7-DNS-Hetzner-Update/main/modules/hetzner_dns.py
 wget -O /usr/local/bin/hetznerdns/modules/observer_handler.py                 https://raw.githubusercontent.com/Maker-Hub-De/CWP7-DNS-Hetzner-Update/main/modules/observer_handler.py
 
 # Set permissions to execute file
