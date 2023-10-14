@@ -73,8 +73,11 @@ if __name__ == "__main__":
     except IOError:
         print("Another instance is already running.")
         sys.exit(1)
+
+    # Create an Observer that monitors the directory
+    my_observer = Observer()
     
-    atexit.register(stop_observer, observer)
+    atexit.register(stop_observer, my_observer)
     atexit.register(remove_lock_file, lock_file)
     
     script_directory = os.path.dirname(os.path.abspath(__file__))  # Pfad zum Verzeichnis, in dem das Skript liegt
@@ -102,13 +105,10 @@ if __name__ == "__main__":
 
     # Create the table if it doesn't exist
     db_manager.create_table()
-
-    # Create an Observer that monitors the directory
-    my_observer = Observer()
+    
+    # Configurate nad start the Observer
     my_observer.schedule(MyObserverHandler(db_manager, auth_api_token, named_directory, observer), path=named_directory, recursive=False)
-
-    # Start the Observer
-    observer.start()
+    my_observer.start()
 
     try:
         while True:
