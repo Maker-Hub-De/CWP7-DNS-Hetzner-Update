@@ -1,4 +1,4 @@
-!/usr/bin/python3
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 __author__     = "Mia Sophie Behrendt"
 __copyright__  = "Copyright 2023, Maker-Hub.de"
