@@ -9,9 +9,10 @@ __status__     = "Development"
 __date__       = "12.10.2023"
 
 import logging
-
+from datetime import datetime
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
+from modules import hetzner_dns
 
 class ObserverHandler(FileSystemEventHandler):
     def __init__(self, db_manager, auth_api_token, directory, observer, logger=None):
@@ -30,7 +31,7 @@ class ObserverHandler(FileSystemEventHandler):
         self.observer.unschedule_all()
 
         current_check_time = datetime.now().timestamp()
-        hezner_dns = HeznerDNS(self.auth_api_token)
+        hezner_dns = HetznerDNS(self.auth_api_token)
 
         file_list = os.listdir(self.directory)
         for file_name in file_list:
