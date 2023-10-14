@@ -91,7 +91,7 @@ if __name__ == "__main__":
     
     # Load the configuration from the JSON file
     config_file_path = os.path.join(script_directory, 'config.json')  # Pfad zur Config-datei im Skriptverzeichnis
-    named_directory, auth_api_token = load_config(config_file_path, my_logger)
+    named_directory, auth_api_token = load_config(config_file_path)
 
     # Check if the authentication API token is set
     check_auth_api_token(auth_api_token)
