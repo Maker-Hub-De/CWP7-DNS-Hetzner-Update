@@ -22,9 +22,10 @@ from modules import hetzner_dns
 from modules import observer_handler
 
 # Function to load the configuration from the JSON file
-def load_config(filename, logging):
+def load_config(filename, logger=None):
+    my_logger = logger if logger else logging.getLogger("hetznerDnsUpdate")
     if not os.path.exists(filename):
-        logging.error("Configuration file '{}' doesn't exist. Script will be stopped")
+        my_logger.error("Configuration file '{}' doesn't exist. Script will be stopped")
         exit()
 
     try:
@@ -38,7 +39,7 @@ def load_config(filename, logging):
 
             return directory, api_token
     except json.JSONDecodeError as e:
-        logging.error(f"Error loading configuration: {str(e)}")
+        my_logger.error(f"Error loading configuration: {str(e)}")
         exit()
 
 # Check if the authentication API token is present
@@ -87,10 +88,10 @@ if __name__ == "__main__":
     logging.basicConfig(filename=log_filename, \
                         level=logging.INFO, \
                         format='%(asctime)s - %(name)s - %(levelname)s: %(message)s')
-
+    
     # Load the configuration from the JSON file
     config_file_path = os.path.join(script_directory, 'config.json')  # Pfad zur Config-datei im Skriptverzeichnis
-    named_directory, auth_api_token = load_config(config_file_path, logging)
+    named_directory, auth_api_token = load_config(config_file_path, my_logger)
 
     # Check if the authentication API token is set
     check_auth_api_token(auth_api_token)
