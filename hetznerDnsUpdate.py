@@ -18,7 +18,6 @@ import atexit
 import json
 from watchdog.observers import Observer
 from modules import db_manager
-from modules import hetzner_dns
 from modules import observer_handler
 
 observer_started = False
