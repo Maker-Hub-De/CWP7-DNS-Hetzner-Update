@@ -41,11 +41,11 @@ fi
 wget -O /etc/systemd/system/hetznerDnsUpdate.service                          https://github.com/Maker-Hub-De/CWP7-DNS-Hetzner-Update/raw/main/hetznerDnsUpdate.service
 
 # Enable the new systemd service
-sudo systemctl enable hetzerDnsUpdate.service
+sudo systemctl enable hetznerDnsUpdate.service
 
 # right now we wont want to start the service
-# sudo systemctl start hetzerDnsUpdate.service
+# sudo systemctl start hetznerDnsUpdate.service
 
 echo "Installation completed."
 echo "You can start the service manually with:"
-echo "sudo systemctl start hetzerDnsUpdate.service"
+echo "sudo systemctl start hetznerDnsUpdate.service"
