@@ -43,23 +43,29 @@ def load_config(filename, logger=None):
         exit()
 
 # Check if the authentication API token is present
-def check_auth_api_token(api_token):
+def check_auth_api_token(api_token, logger=None):
+    my_logger = logger if logger else logging.getLogger("hetznerDnsUpdate")  
+    
     if api_token == "":
-        logging.error("Authentifizierungs-Token is missing. Script will be stopped")
+        my_logger.error("Authentifizierungs-Token is missing. Script will be stopped")
         exit()
 
 # Check if the directory exists
-def check_directory(named_directory):
+def check_directory(named_directory, logger=None):
+    my_logger = logger if logger else logging.getLogger("hetznerDnsUpdate")
+    
     if not os.path.exists(named_directory):
-        logging.error("Directory '{}' dosen't exist. Script will be stopped".format(named_directory))
+        my_logger.error("Directory '{}' dosen't exist. Script will be stopped".format(named_directory))
         exit()
 
-def remove_lock_file(lock_file):
+def remove_lock_file(lock_file, logger=None):
+    my_logger = logger if logger else logging.getLogger("hetznerDnsUpdate")
+    
     try:
         lock_file.close()
         os.remove("dnsUpdate.lock")
     except Exception as e:
-        print(f"Fehler beim Entfernen der Sperrdatei: {str(e)}")
+        my_logger.error(f"Erro during deleten lock file: {str(e)}")
         
 def stop_observer(observer):
     observer.stop()
@@ -88,27 +94,29 @@ if __name__ == "__main__":
     logging.basicConfig(filename=log_filename, \
                         level=logging.INFO, \
                         format='%(asctime)s - %(name)s - %(levelname)s: %(message)s')
+
+    my_logger = logging.getLogger("hetznerDnsUpdate")
     
     # Load the configuration from the JSON file
     config_file_path = os.path.join(script_directory, 'config.json')  # Pfad zur Config-datei im Skriptverzeichnis
     named_directory, auth_api_token = load_config(config_file_path)
 
     # Check if the authentication API token is set
-    check_auth_api_token(auth_api_token)
+    check_auth_api_token(auth_api_token, my_logger)
 
     # Check if the directory exists
-    check_directory(named_directory)
+    check_directory(named_directory, my_logger)
 
     # Create an instance of the DBManager class with the file path to the database
     db_file_path = os.path.join(script_directory, 'file_info.db')  # Pfad zur Datenbankdatei im Skriptverzeichnis
 
-    db_manager = db_manager.DBManager(db_file_path)
+    my_db_manager = db_manager.DBManager(db_file_path)
 
     # Create the table if it doesn't exist
-    db_manager.create_table()
+    my_db_manager.create_table()
     
     # Configurate nad start the Observer
-    my_observer.schedule(MyObserverHandler(db_manager, auth_api_token, named_directory, observer), path=named_directory, recursive=False)
+    my_observer.schedule(MyObserverHandler(my_db_manager, auth_api_token, named_directory, my_observer), path=named_directory, recursive=False)
     my_observer.start()
 
     try:
