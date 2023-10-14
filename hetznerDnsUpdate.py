@@ -17,8 +17,8 @@ import fcntl
 import atexit
 import json
 from watchdog.observers import Observer
-from modules import db_manager
-from modules import observer_handler
+from modules.db_manager import DBManager
+from from modules.observer_handler import ObserverHandler
 
 observer_started = False
 
@@ -113,7 +113,7 @@ if __name__ == "__main__":
     # Create an instance of the DBManager class with file path to the database
     db_file_path = os.path.join(script_directory, 'file_info.db')  # Pfad zur Datenbankdatei im Skriptverzeichnis
 
-    my_db_manager = db_manager.DBManager(db_file_path)
+    my_db_manager = DBManager(db_file_path)
 
     # Create the table if it doesn't exist
     my_db_manager.create_table()
