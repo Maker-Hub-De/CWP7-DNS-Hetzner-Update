@@ -18,20 +18,20 @@ sudo mkdir -p /usr/local/bin/hetzerdns/
 sudo mkdir -p /usr/local/bin/hetzerdns/modules/
 
 # Download python program from GitHub
-wget -O /usr/local/bin/hetzerdns/hetzerDnsUpdate.py                          https://github.com/Maker-Hub-De/CWP7-DNS-Hetzner-Update/raw/main/hetzerDnsUpdate.py
-wget -O /usr/local/bin/hetzerdns/modules/__init__.py                        https://raw.githubusercontent.com/Maker-Hub-De/CWP7-DNS-Hetzner-Update/main/modules/__init__.py
-wget -O /usr/local/bin/hetzerdns/modules/db_manager.py                       https://raw.githubusercontent.com/Maker-Hub-De/CWP7-DNS-Hetzner-Update/main/modules/db_manager.py
-wget -O /usr/local/bin/hetzerdns/modules/hezner_dns.py                       https://raw.githubusercontent.com/Maker-Hub-De/CWP7-DNS-Hetzner-Update/main/modules/hezner_dns.py
-wget -O /usr/local/bin/hetzerdns/modules/observer_handler.py                 https://raw.githubusercontent.com/Maker-Hub-De/CWP7-DNS-Hetzner-Update/main/modules/observer_handler.py
+wget -O /usr/local/bin/hetznerdns/hetznerDnsUpdate.py                          https://github.com/Maker-Hub-De/CWP7-DNS-Hetzner-Update/raw/main/hetzerDnsUpdate.py
+wget -O /usr/local/bin/hetznerdns/modules/__init__.py                        https://raw.githubusercontent.com/Maker-Hub-De/CWP7-DNS-Hetzner-Update/main/modules/__init__.py
+wget -O /usr/local/bin/hetznerdns/modules/db_manager.py                       https://raw.githubusercontent.com/Maker-Hub-De/CWP7-DNS-Hetzner-Update/main/modules/db_manager.py
+wget -O /usr/local/bin/hetznerdns/modules/hezner_dns.py                       https://raw.githubusercontent.com/Maker-Hub-De/CWP7-DNS-Hetzner-Update/main/modules/hezner_dns.py
+wget -O /usr/local/bin/hetznerdns/modules/observer_handler.py                 https://raw.githubusercontent.com/Maker-Hub-De/CWP7-DNS-Hetzner-Update/main/modules/observer_handler.py
 
 # Set permissions to execute file
-chmod +x /usr/local/bin/hetzerdns/hetzerDnsUpdate.py
+chmod +x /usr/local/bin/hetznerdns/hetznerDnsUpdate.py
 
 # Donload plugin page and make it avalible
-wget -O /usr/local/cwpsrv/htdocs/resources/admin/modules/hetzerDnsUpdate.php https://github.com/Maker-Hub-De/CWP7-DNS-Hetzner-Update/raw/main/hetzerDnsUpdate.php
+wget -O /usr/local/cwpsrv/htdocs/resources/admin/modules/hetznerDnsUpdate.php https://github.com/Maker-Hub-De/CWP7-DNS-Hetzner-Update/raw/main/hetznerDnsUpdate.php
 
 # Check and add menu entry to 3rdparty.php
-menu_entry='<li><a href="index.php?module=hetzerDnsUpdate"><span class="icon16 icomoon-icon-arrow-right-3"></span>Hetzner DNS Zone update</a></li>'
+menu_entry='<li><a href="index.php?module=hetznerDnsUpdate"><span class="icon16 icomoon-icon-arrow-right-3"></span>Hetzner DNS Zone update</a></li>'
 if ! grep -q "$menu_entry" /usr/local/cwpsrv/htdocs/resources/admin/include/3rdparty.php; then
   echo "Adding menu entry to 3rdparty.php."
   echo $menu_entry >> /usr/local/cwpsrv/htdocs/resources/admin/include/3rdparty.php
