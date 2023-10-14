@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+!/usr/bin/python3
 # -*- coding: utf-8 -*-
 __author__     = "Mia Sophie Behrendt"
 __copyright__  = "Copyright 2023, Maker-Hub.de"
@@ -12,7 +12,7 @@ __date__       = "12.10.2023"
 import os
 import logging
 import time
-import sys
+import sy
 import fcntl
 import atexit
 import json
@@ -26,7 +26,7 @@ def load_config(filename, logger=None):
     my_logger = logger if logger else logging.getLogger("hetznerDnsUpdate")
     if not os.path.exists(filename):
         my_logger.error("Configuration file '{}' doesn't exist. Script will be stopped")
-        exit()
+        sys.exit(1)
 
     try:
         with open(filename, 'r') as config_file:
@@ -40,7 +40,7 @@ def load_config(filename, logger=None):
             return directory, api_token
     except json.JSONDecodeError as e:
         my_logger.error(f"Error loading configuration: {str(e)}")
-        exit()
+        sys.exit(1)
 
 # Check if the authentication API token is present
 def check_auth_api_token(api_token, logger=None):
@@ -48,15 +48,15 @@ def check_auth_api_token(api_token, logger=None):
     
     if api_token == "":
         my_logger.error("Authentifizierungs-Token is missing. Script will be stopped")
-        exit()
+        sys.exit(1)
 
 # Check if the directory exists
 def check_directory(named_directory, logger=None):
     my_logger = logger if logger else logging.getLogger("hetznerDnsUpdate")
     
     if not os.path.exists(named_directory):
-        my_logger.error("Directory '{}' dosen't exist. Script will be stopped".format(named_directory))
-        exit()
+        my_logger.error("Watch dog directory '{}' dosen't exist. Script will be stopped".format(named_directory))
+        sys.exit(1)
 
 def remove_lock_file(lock_file, logger=None):
     my_logger = logger if logger else logging.getLogger("hetznerDnsUpdate")
@@ -66,19 +66,26 @@ def remove_lock_file(lock_file, logger=None):
         os.remove("dnsUpdate.lock")
     except Exception as e:
         my_logger.error(f"Erro during deleten lock file: {str(e)}")
-        
+
 def stop_observer(observer):
     observer.stop()
     observer.join()
     
 # The main part starts here
 if __name__ == "__main__":
+    # Initialize logging
+    log_filename = os.path.join(script_directory, time.strftime("%Y.%m.hetznerDnsUpdate.log"))
+    logging.basicConfig(filename=log_filename, \
+                        level=logging.INFO, \
+                        format='%(asctime)s - %(name)s - %(levelname)s: %(message)s')
 
+    my_logger = logging.getLogger("hetznerDnsUpdate")
+    
     lock_file = open("dnsUpdate.lock", "w")
     try:
         fcntl.lockf(lock_file, fcntl.LOCK_EX | fcntl.LOCK_NB)
     except IOError:
-        print("Another instance is already running.")
+         my_logger.error("Another instance is already running.")
         sys.exit(1)
 
     # Create an Observer that monitors the directory
@@ -88,14 +95,6 @@ if __name__ == "__main__":
     atexit.register(remove_lock_file, lock_file)
     
     script_directory = os.path.dirname(os.path.abspath(__file__))  # Pfad zum Verzeichnis, in dem das Skript liegt
-
-    # Initialize logging
-    log_filename = os.path.join(script_directory, time.strftime("%Y.%m.hetznerDnsUpdate.log"))
-    logging.basicConfig(filename=log_filename, \
-                        level=logging.INFO, \
-                        format='%(asctime)s - %(name)s - %(levelname)s: %(message)s')
-
-    my_logger = logging.getLogger("hetznerDnsUpdate")
     
     # Load the configuration from the JSON file
     config_file_path = os.path.join(script_directory, 'config.json')  # Pfad zur Config-datei im Skriptverzeichnis
@@ -107,7 +106,7 @@ if __name__ == "__main__":
     # Check if the directory exists
     check_directory(named_directory, my_logger)
 
-    # Create an instance of the DBManager class with the file path to the database
+    # Create an instance of the DBManager class with file path to the database
     db_file_path = os.path.join(script_directory, 'file_info.db')  # Pfad zur Datenbankdatei im Skriptverzeichnis
 
     my_db_manager = db_manager.DBManager(db_file_path)
@@ -115,7 +114,7 @@ if __name__ == "__main__":
     # Create the table if it doesn't exist
     my_db_manager.create_table()
     
-    # Configurate nad start the Observer
+    # Configure and start the observer
     my_observer.schedule(MyObserverHandler(my_db_manager, auth_api_token, named_directory, my_observer), path=named_directory, recursive=False)
     my_observer.start()
 
