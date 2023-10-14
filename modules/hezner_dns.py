@@ -12,7 +12,7 @@ import requests
 import json
 import logging
 
-class HeznerDNS:
+class HetznerDNS:
     def __init__(self, auth_api_token, logger=None):
         self.auth_api_token = auth_api_token
         self.logger = logger if logger else logging.getLogger("HeznerDNS")
