@@ -22,21 +22,21 @@ class DBManager:
         if not os.path.exists(self.db_filename):
             self.create_db_file()
         else:
-            self.logging.info(f"Database file '{self.db_filename}' found")
+            self.logger.info(f"Database file '{self.db_filename}' found")
 
     def __del__(self):
         try:
             if hasattr(self, 'conn'):
                 self.conn.close()
         except sqlite3.Error as e:
-            self.logging.error(f"Error closing the database connection: {str(e)}")
+            self.logger.error(f"Error closing the database connection: {str(e)}")
 
     def create_db_file(self):
         try:
             with sqlite3.connect(self.db_filename) as conn:
-                self.logging.info(f"Database file '{self.db_filename}' created")
+                self.logger.info(f"Database file '{self.db_filename}' created")
         except sqlite3.Error as e:
-            self.logging.error(f"Error creating database file: {str(e)}")
+            self.logger.error(f"Error creating database file: {str(e)}")
             exit()  # Exit the program
 
     def create_table(self):
@@ -57,11 +57,11 @@ class DBManager:
                         )
                     ''')
                     conn.commit()
-                    self.logging.info("Table file_info created")
+                    self.logger.info("Table file_info created")
                 else:
-                    self.logging.info("Table file_info exists")
+                    self.logger.info("Table file_info exists")
         except sqlite3.Error as e:
-            self.logging.error(f"Error creating table: {str(e)}")
+            self.logger.error(f"Error creating table: {str(e)}")
 
     def insert_file_info(self, filename, last_modified, last_checked):
         try:
@@ -72,7 +72,7 @@ class DBManager:
             conn.close()
             return True
         except sqlite3.Error as e:
-            self.logging.error(f"Error inserting file info: {str(e)}")
+            self.logger.error(f"Error inserting file info: {str(e)}")
             return False
 
     def update_file_info(self, filename, last_modified, last_checked):
@@ -84,7 +84,7 @@ class DBManager:
             conn.close()
             return True
         except sqlite3.Error as e:
-            self.logging.error(f"Error updating file info: {str(e)}")
+            self.logger.error(f"Error updating file info: {str(e)}")
             return False
 
     def delete_file_info(self, filename):
@@ -96,7 +96,7 @@ class DBManager:
             conn.close()
             return True
         except sqlite3.Error as e:
-            self.logging.error(f"Error deleting file info: {str(e)}")
+            self.logger.error(f"Error deleting file info: {str(e)}")
             return False
 
     def get_file_info(self, filename):
@@ -111,7 +111,7 @@ class DBManager:
             else:
                 return None, None
         except sqlite3.Error as e:
-            self.logging.error(f"Error getting file info: {str(e)}")
+            self.logger.error(f"Error getting file info: {str(e)}")
             return None, None
 
     def get_files_not_checked_since(self, since_datetime):
@@ -123,5 +123,5 @@ class DBManager:
             conn.close()
             return rows
         except sqlite3.Error as e:
-            self.logging.error(f"Error getting files not checked since: {str(e)}")
+            self.logger.error(f"Error getting files not checked since: {str(e)}")
             return []
