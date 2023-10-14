@@ -1,0 +1,11 @@
+[Unit]
+Description=Update DNS zone data on Hetzner name server via API
+
+[Service]
+ExecStart=/usr/local/bin/hetzerdns/hetzerDnsUpdate.py
+Restart=on-failure
+User=nobody
+Group=nobody
+
+[Install]
+WantedBy=multi-user.target
