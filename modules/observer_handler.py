@@ -70,86 +70,100 @@ class ObserverHandler(FileSystemEventHandler):
             print(f"Änderung db: {last_modified_db}")
             print(f"Check db: {last_checked}")
 
-            if last_modified_db == last_modified_file:
-                # Just update the check time
+            " Checking if the file was ever checked
+            if last_checked == None:
+                # The file was never checked => it could be a new zone or a file that was never checked before
+                # Getting domain from file name
+                domain = hezner_dns.get_domain(file_name)
+                
+                # Try to get a zone ID; the zone may already exist and only the database entry was missing
+                zone_id = hezner_dns.get_zone_id(domain)
+                
+                if zone_id == None:  # We don't have an existing zone
+                    domain = hezner_dns.create_zone(domain)
+                    
+                if zone_id == None: # Now we should have a zone id; if not, there is a problem in the DNS app.
+                    self.logger.error("Could not create a new zone")
+                    continue  # Continue to the next file
+
+                # Now we can updating the zone data
+                hezner_dns.update_zone_from_file(zone_id, domain, file_path)
+                
+                # Adding new file to the database
+                if not self.db_manager.insert_file_info(file_name, last_modified_file, current_check_time)
+                    self.logger.error(f"Could not insert file {file_name} in database.")
+                    continue # Continue to the next file
+                
+            # Checking if the file was modified
+            elif last_modified_db == last_modified_file:
+                # No modification found => just update the check time
                 print("Just update the check time")
                 if not self.db_manager.update_file_info(file_name, last_modified_file, current_check_time):
                     self.logger.error("Could not update file {file_name} in database.")
                     continue # Continue to the next file
-                    
-            if last_checked == None: # No entry found; it could be a new zone
-                print("No entry found; it could be a new zone")
-                domain = hezner_dns.get_domain(file_name)
-                # Try to get a zone ID; the zone may already exist
-                zone_id = hezner_dns.get_zone_id(domain)
-                if zone_id == None:  # We don't have an existing zone
-                    domain = hezner_dns.create_zone(domain)
-                if zone_id == None: # Now we schould have a zone id; if not go on
-                    self.logger.error("Could not create a new zone")
-                    continue  # Continue to the next file
 
-                # Updating the zone data
-                hezner_dns.update_zone_from_file(zone_id, domain, file_path)
-                # Insert into the database
-                if not self.db_manager.insert_file_info(file_name, last_modified_file, current_check_time)
-                    self.logger.error("Could not insert file {file_name} in database.")
-                    continue # Continue to the next file
-            # changes that younger then last check and the last check scould be at least 2 seconds in the past   
+            # changes that younger then last check and the last check scould be at least 2 seconds in the past
+            # We checking for the two seconds, because the dns update from the CWP7 frontend trigger several
+            # changes in the directory but we want only to send one update. Dont SPAM the API :-)
             elif last_modified_file > last_checked \
             and  last_modified_file != last_modified_db \
-            and  last_checked < current_check_time - 2:
-                print("Found a changed file")            
-                # Found a changed file
+            and  last_checked < current_check_time - 2:        
+                # Found a changed file that is relevant
                 domain = hezner_dns.get_domain(file_name)
                 # Try to get a zone ID; the zone may already exist
                 zone_id = hezner_dns.get_zone_id(domain)
                 if zone_id == None: # Now we schould have a zone id; if not go on
                     domain = hezner_dns.create_zone(domain)
 
-                if zone_id == None: # Now we need to have a zone_id
+                if zone_id == None: # Now we should have a zone id; if not, there is a problem in the DNS app.
                     self.logger.error("Could not create new zone")
                     continue # Continue to the next file
 
                 # Updating the zone data
                 hezner_dns.update_zone_from_file(zone_id, domain, file_name)
+                
                 # Updating the database
                 if not self.db_manager.update_file_info(file_name, last_modified_file, current_check_time):
-                    self.logger.error("Could not update file {file_name} in database.")
+                    self.logger.error(f"Could not update file {file_name} in database.")
                     continue # Continue to the next file
 
             else:
-                # Just update the check time
-                print("Just update the check time")      
+                # In any other case Just updating the check time. I have no idea which case it could be but let us make the program robust :-)   
                 if not self.db_manager.update_file_info(file_name, last_modified_file, current_check_time):
-                    self.logger.error("Could not update file {file_name} in database.")
+                    self.logger.error(f"Could not update file {file_name} in database.")
                     continue # Continue to the next file
 
         # Now checking the files in the database which weren't updated
         # That could happen if the file was deleted
         # First, get all relevant files
         files_in_db = self.db_manager.get_files_not_checked_since(current_check_time)
-        
+
+        # All files where updated => Nothing to do
         if not files_in_db:
             return
-        
+
+        # Checking all entries in the database
         for file_name in files_in_db:
             # Use an absolute path to the file
-            print(file_name[0])
             file_path = os.path.abspath(os.path.join(self.directory, file_name[0]))
                            
             # Check if the file still exists on the file system
-            if not os.path.exists(file_path):
-            
-                # File was deleted
+            if not os.path.exists(file_path): # File was deleted
+                # Getting domain from filename
                 domain = hezner_dns.get_domain(file_name[0])
+                
+                # Seaching the zone id
                 zone_id = hezner_dns.get_zone_id(domain)
-                if zone_id:
-                     # We have to delete the zone
+                
+                if zone_id: # We found a zone id
+                     # Deleting the zone id
                     if not hezner_dns.delete_zone(domain):
                         self.logger.error(f"Could not delete zone {domain} from Hetzner DNS.")
                         continue  # Continue to the next file
-                    if not self.db_manager.delete_file_info(file_name[0]):
-                        self.logger.error(f"Could not delete file {file_name[0]} from database.")
+                # It doesn't matter if we found a zone id, we will delete the file entry in the data
+                # base because we assuming that the api is working and we getting the data from it
+                if not self.db_manager.delete_file_info(file_name[0]):
+                    self.logger.error(f"Could not delete file {file_name[0]} from database.")
                         continue  # Continue to the next file
 
         # Start the observer again
