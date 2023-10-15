@@ -9,6 +9,7 @@ __status__     = "Development"
 __date__       = "12.10.2023"
 
 import logging
+import os
 from datetime import datetime
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
