@@ -24,10 +24,22 @@ class ObserverHandler(FileSystemEventHandler):
         self.observer = observer
         self.logger = logger if logger else logging.getLogger("MyObserverHandler")
 
+    def on_created(self, event):
+        if event.is_directory:
+         return
+        check_4_changes()
+
+    def on_deleted(self, event):
+        if event.is_directory:
+         return
+        check_4_changes()
+
     def on_modified(self, event):
         if event.is_directory:
          return
+        check_4_changes()
 
+    def check_4_changes(self):
         # Stop the observer temporarily
         self.observer.unschedule_all()
 
