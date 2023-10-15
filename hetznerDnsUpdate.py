@@ -12,7 +12,7 @@ __date__       = "12.10.2023"
 import os
 import logging
 import time
-#import sys
+import sys
 import fcntl
 import atexit
 import json
