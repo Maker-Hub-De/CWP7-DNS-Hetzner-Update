@@ -91,7 +91,7 @@ class DBManager:
         try:
             conn = sqlite3.connect(self.db_filename)
             cursor = conn.cursor()
-            cursor.execute("DELETE FROM file_info WHERE filename = ?", (filename,))
+            cursor.execute("DELETE FROM file_info WHERE filename = ?", [filename])
             conn.commit()
             conn.close()
             return True
