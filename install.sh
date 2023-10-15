@@ -18,7 +18,7 @@ sudo mkdir -p /usr/local/bin/hetznerdns/
 sudo mkdir -p /usr/local/bin/hetznerdns/modules/
 
 # Download python program from GitHub
-sudo wget -O /usr/local/bin/hetznerdns/hetznerDnsUpdate.py         https://raw.githubusercontent.com/Maker-Hub-De/CWP7-DNS-Hetzner-Update/raw/main/hetznerDnsUpdate.py
+sudo wget -O /usr/local/bin/hetznerdns/hetznerDnsUpdate.py         https://raw.githubusercontent.com/Maker-Hub-De/CWP7-DNS-Hetzner-Update/main/hetznerDnsUpdate.py
 sudo wget -O /usr/local/bin/hetznerdns/config.json                 https://raw.githubusercontent.com/Maker-Hub-De/CWP7-DNS-Hetzner-Update/main/config.json
 sudo wget -O /usr/local/bin/hetznerdns/configGet.py                https://raw.githubusercontent.com/Maker-Hub-De/CWP7-DNS-Hetzner-Update/main/configGet.py
 sudo wget -O /usr/local/bin/hetznerdns/configUpdate.py             https://raw.githubusercontent.com/Maker-Hub-De/CWP7-DNS-Hetzner-Update/main/configUpdate.py
