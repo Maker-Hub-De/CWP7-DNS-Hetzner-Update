@@ -8,7 +8,7 @@ download_file() {
     
     if wget --spider "$url" 2>/dev/null; then
         echo "Downloading: $url"
-        sudo wget -O "$target" "$url"
+        sudo wget -q -O "$target" "$url"
     else {
         echo "URL not available: $url"
     }
