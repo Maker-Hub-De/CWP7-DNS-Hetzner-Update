@@ -18,13 +18,17 @@ download_file() {
 if ! command -v wget &> /dev/null; then
   echo "Wget is not installed. Installing it."
   sudo dnf install wget -y
+else
+  echo "Wget is already installed."
 fi
 
-# Check and install Watchdog
-if ! command -v watchdog &> /dev/null; then
+if ! pip3 show watchdog | grep -q "watchdog"; then
   echo "Watchdog is not installed. Installing it."
-  sudo dnf install python3-watchdog -y
+  pip3 install watchdog
+else
+  echo "Watchdog is already installed."
 fi
+
 
 # Create directories
 sudo mkdir -p /usr/local/bin/hetznerdns/
