@@ -60,15 +60,12 @@ class ObserverHandler(FileSystemEventHandler):
                 continue
             
             if not os.path.exists(file_path):
+                # That should never happen, because we read the directory directly before but who knows :-)
                 self.logger.error(f"File {file_path} not found.")
                 continue
 
             last_modified_file = int(os.path.getmtime(file_path))
             last_modified_db, last_checked = self.db_manager.get_file_info(file_name)
-
-            print(f"Änderung Datei: {last_modified_file}")
-            print(f"Änderung db: {last_modified_db}")
-            print(f"Check db: {last_checked}")
 
             " Checking if the file was ever checked
             if last_checked == None:
@@ -87,7 +84,10 @@ class ObserverHandler(FileSystemEventHandler):
                     continue  # Continue to the next file
 
                 # Now we can updating the zone data
-                hezner_dns.update_zone_from_file(zone_id, domain, file_path)
+                if not hezner_dns.update_zone_from_file(zone_id, domain, file_name):
+                    # The log will be written within the method update_zone_from_file
+                    # we just need to contiue to not update the database and can try it the next time
+                    continue  # Continue to the next file
                 
                 # Adding new file to the database
                 if not self.db_manager.insert_file_info(file_name, last_modified_file, current_check_time)
@@ -110,8 +110,10 @@ class ObserverHandler(FileSystemEventHandler):
             and  last_checked < current_check_time - 2:        
                 # Found a changed file that is relevant
                 domain = hezner_dns.get_domain(file_name)
+                
                 # Try to get a zone ID; the zone may already exist
                 zone_id = hezner_dns.get_zone_id(domain)
+                
                 if zone_id == None: # Now we schould have a zone id; if not go on
                     domain = hezner_dns.create_zone(domain)
 
@@ -121,7 +123,11 @@ class ObserverHandler(FileSystemEventHandler):
 
                 # Updating the zone data
                 hezner_dns.update_zone_from_file(zone_id, domain, file_name)
-                
+                if not hezner_dns.update_zone_from_file(zone_id, domain, file_name):
+                    # The log will be written within the method update_zone_from_file
+                    # we just need to contiue to not update the database and can try it the next time
+                    continue  # Continue to the next file
+                    
                 # Updating the database
                 if not self.db_manager.update_file_info(file_name, last_modified_file, current_check_time):
                     self.logger.error(f"Could not update file {file_name} in database.")
