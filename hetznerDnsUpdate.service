@@ -4,8 +4,8 @@ Description=Update DNS zone data on Hetzner name server via API
 [Service]
 ExecStart=/usr/local/bin/hetzerdns/hetznerDnsUpdate.py
 Restart=on-failure
-User=nobody
-Group=nobody
+User=hetznerdnsuser
+Group=hetznerdnsuser
 
 [Install]
 WantedBy=multi-user.target
