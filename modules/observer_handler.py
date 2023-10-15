@@ -67,7 +67,7 @@ class ObserverHandler(FileSystemEventHandler):
             last_modified_file = int(os.path.getmtime(file_path))
             last_modified_db, last_checked = self.db_manager.get_file_info(file_name)
 
-            " Checking if the file was ever checked
+            # Checking if the file was ever checked
             if last_checked == None:
                 # The file was never checked => it could be a new zone or a file that was never checked before
                 # Getting domain from file name
