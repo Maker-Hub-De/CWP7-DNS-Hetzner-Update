@@ -18,14 +18,26 @@ sudo mkdir -p /usr/local/bin/hetznerdns/
 sudo mkdir -p /usr/local/bin/hetznerdns/modules/
 
 # Download python program from GitHub
-wget -O /usr/local/bin/hetznerdns/hetznerDnsUpdate.py                          https://github.com/Maker-Hub-De/CWP7-DNS-Hetzner-Update/raw/main/hetznerDnsUpdate.py
-wget -O /usr/local/bin/hetznerdns/modules/__init__.py                          https://raw.githubusercontent.com/Maker-Hub-De/CWP7-DNS-Hetzner-Update/main/modules/__init__.py
-wget -O /usr/local/bin/hetznerdns/modules/db_manager.py                        https://raw.githubusercontent.com/Maker-Hub-De/CWP7-DNS-Hetzner-Update/main/modules/db_manager.py
-wget -O /usr/local/bin/hetznerdns/modules/hetzner_dns.py                        https://raw.githubusercontent.com/Maker-Hub-De/CWP7-DNS-Hetzner-Update/main/modules/hetzner_dns.py
-wget -O /usr/local/bin/hetznerdns/modules/observer_handler.py                  https://raw.githubusercontent.com/Maker-Hub-De/CWP7-DNS-Hetzner-Update/main/modules/observer_handler.py
+sudo wget -O /usr/local/bin/hetznerdns/hetznerDnsUpdate.py         https://raw.githubusercontent.com/Maker-Hub-De/CWP7-DNS-Hetzner-Update/raw/main/hetznerDnsUpdate.py
+sudo wget -O /usr/local/bin/hetznerdns/config.json                 https://raw.githubusercontent.com/Maker-Hub-De/CWP7-DNS-Hetzner-Update/main/config.json
+sudo wget -O /usr/local/bin/hetznerdns/modules/__init__.py         https://raw.githubusercontent.com/Maker-Hub-De/CWP7-DNS-Hetzner-Update/main/modules/__init__.py
+sudo wget -O /usr/local/bin/hetznerdns/modules/db_manager.py       https://raw.githubusercontent.com/Maker-Hub-De/CWP7-DNS-Hetzner-Update/main/modules/db_manager.py
+sudo wget -O /usr/local/bin/hetznerdns/modules/hetzner_dns.py      https://raw.githubusercontent.com/Maker-Hub-De/CWP7-DNS-Hetzner-Update/main/modules/hetzner_dns.py
+sudo wget -O /usr/local/bin/hetznerdns/modules/observer_handler.py https://raw.githubusercontent.com/Maker-Hub-De/CWP7-DNS-Hetzner-Update/main/modules/observer_handler.py
 
-# Set permissions to execute file
-chmod +x /usr/local/bin/hetznerdns/hetznerDnsUpdate.py
+# Set permissions
+sudo chmod 900 /usr/local/bin/hetznerdns/hetznerDnsUpdate.py
+sudo chmod 700 /usr/local/bin/hetznerdns/config.json
+sudo chmod 700 /usr/local/bin/hetznerdns/modules/__init__.py
+sudo chmod 700 /usr/local/bin/hetznerdns/modules/db_manager.py
+sudo chmod 700 /usr/local/bin/hetznerdns/modules/hetzner_dns.py
+sudo chmod 700 /usr/local/bin/hetznerdns/modules/observer_handler.py
+
+# Add service user
+sudo useradd -r -M -s /sbin/nologin hetznerdnsuser
+
+# Set owner
+sudo chown -R hetznerdnsuser: /usr/local/bin/hetznerdns/
 
 # Donload plugin page and make it avalible
 wget -O /usr/local/cwpsrv/htdocs/resources/admin/modules/hetznerDnsUpdate.php https://github.com/Maker-Hub-De/CWP7-DNS-Hetzner-Update/raw/main/hetznerDnsUpdate.php
@@ -38,7 +50,7 @@ if ! grep -q "$menu_entry" /usr/local/cwpsrv/htdocs/resources/admin/include/3rdp
 fi
 
 # Downloading service
-wget -O /etc/systemd/system/hetznerDnsUpdate.service                          https://github.com/Maker-Hub-De/CWP7-DNS-Hetzner-Update/raw/main/hetznerDnsUpdate.service
+wget -O /etc/systemd/system/hetznerDnsUpdate.service https://github.com/Maker-Hub-De/CWP7-DNS-Hetzner-Update/raw/main/hetznerDnsUpdate.service
 
 # Enable the new systemd service
 sudo systemctl enable hetznerDnsUpdate.service
