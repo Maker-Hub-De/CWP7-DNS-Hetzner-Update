@@ -83,6 +83,8 @@ download_file "https://github.com/Maker-Hub-De/CWP7-DNS-Hetzner-Update/raw/main/
 
 # Enable the new systemd service
 sudo systemctl enable hetznerDnsUpdate.service
+sudo systemctl daemon-reload
+
 
 echo "Installation completed."
 echo "You can start the service manually with:"
