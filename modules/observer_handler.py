@@ -107,7 +107,7 @@ class ObserverHandler(FileSystemEventHandler):
             # changes in the directory but we want only to send one update. Dont SPAM the API :-)
             elif last_modified_file > last_checked \
             and  last_modified_file != last_modified_db \
-            and  last_checked < current_check_time - 2:        
+            and  last_checked < current_check_time - 2:
                 # Found a changed file that is relevant
                 domain = hetzner_dns.get_domain(file_name)
 
@@ -170,7 +170,7 @@ class ObserverHandler(FileSystemEventHandler):
                 # base because we assuming that the api is working and we getting the data from it
                 if not self.db_manager.delete_file_info(file_name[0]):
                     self.logger.error(f"Could not delete file {file_name[0]} from database.")
-                        continue  # Continue to the next file
+                    continue  # Continue to the next file
 
         # Start the observer again
         self.observer.schedule(self, path=self.directory, recursive=False)
