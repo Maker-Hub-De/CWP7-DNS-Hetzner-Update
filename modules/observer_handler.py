@@ -74,7 +74,7 @@ class ObserverHandler(FileSystemEventHandler):
                 # Just update the check time
                 print("Just update the check time")
                 if not self.db_manager.update_file_info(file_name, last_modified_file, current_check_time):
-                    self.logger.error("Could not update file {file_name} in datagbase.")
+                    self.logger.error("Could not update file {file_name} in database.")
                     continue # Continue to the next file
                     
             if last_checked == None: # No entry found; it could be a new zone
