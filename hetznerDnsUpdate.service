@@ -3,6 +3,7 @@ Description=Update DNS zone data on Hetzner name server via API
 
 [Service]
 ExecStart=/usr/local/bin/hetznerdns/hetznerDnsUpdate.py
+WorkingDirectory=/usr/local/bin/hetznerdns/
 Restart=on-failure
 User=hetznerdnsuser
 Group=hetznerdnsuser
