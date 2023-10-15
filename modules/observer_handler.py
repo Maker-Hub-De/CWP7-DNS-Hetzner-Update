@@ -90,7 +90,7 @@ class ObserverHandler(FileSystemEventHandler):
                     continue  # Continue to the next file
 
                 # Adding new file to the database
-                if not self.db_manager.insert_file_info(file_name, last_modified_file, current_check_time)
+                if not self.db_manager.insert_file_info(file_name, last_modified_file, current_check_time):
                     self.logger.error(f"Could not insert file {file_name} in database.")
                     continue # Continue to the next file
 
