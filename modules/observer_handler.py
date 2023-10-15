@@ -129,15 +129,15 @@ class ObserverHandler(FileSystemEventHandler):
             if not os.path.exists(file_path):
             
                 # File was deleted
-                domain = hezner_dns.get_domain(file_name)
+                domain = hezner_dns.get_domain(file_name[0])
                 zone_id = hezner_dns.get_zone_id(domain)
                 if zone_id:
                      # We have to delete the zone
                     if not hezner_dns.delete_zone(domain):
                         self.logger.error(f"Could not delete zone {domain} from Hetzner DNS.")
                         continue  # Continue to the next file
-                    if not self.db_manager.delete_file_info(file_name):
-                        self.logger.error(f"Could not delete file {file_name} from database.")
+                    if not self.db_manager.delete_file_info(file_name[0]):
+                        self.logger.error(f"Could not delete file {file_name[0]} from database.")
                         continue  # Continue to the next file
 
         # Start the observer again
