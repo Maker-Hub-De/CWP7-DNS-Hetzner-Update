@@ -44,7 +44,7 @@ class ObserverHandler(FileSystemEventHandler):
         self.observer.unschedule_all()
 
         current_check_time = datetime.now().timestamp()
-        hezner_dns = HetznerDNS(self.auth_api_token)
+        hetzner_dns = HetznerDNS(self.auth_api_token)
 
         file_list = os.listdir(self.directory)
         for file_name in file_list:
@@ -71,20 +71,20 @@ class ObserverHandler(FileSystemEventHandler):
             if last_checked == None:
                 # The file was never checked => it could be a new zone or a file that was never checked before
                 # Getting domain from file name
-                domain = hezner_dns.get_domain(file_name)
+                domain = hetzner_dns.get_domain(file_name)
                 
                 # Try to get a zone ID; the zone may already exist and only the database entry was missing
-                zone_id = hezner_dns.get_zone_id(domain)
+                zone_id = hetzner_dns.get_zone_id(domain)
                 
                 if zone_id == None:  # We don't have an existing zone
-                    domain = hezner_dns.create_zone(domain)
+                    domain = hetzner_dns.create_zone(domain)
                     
                 if zone_id == None: # Now we should have a zone id; if not, there is a problem in the DNS app.
                     self.logger.error("Could not create a new zone")
                     continue  # Continue to the next file
 
                 # Now we can updating the zone data
-                if not hezner_dns.update_zone_from_file(zone_id, domain, file_name):
+                if not hetzner_dns.update_zone_from_file(zone_id, domain, file_name):
                     # The log will be written within the method update_zone_from_file
                     # we just need to contiue to not update the database and can try it the next time
                     continue  # Continue to the next file
@@ -109,21 +109,21 @@ class ObserverHandler(FileSystemEventHandler):
             and  last_modified_file != last_modified_db \
             and  last_checked < current_check_time - 2:        
                 # Found a changed file that is relevant
-                domain = hezner_dns.get_domain(file_name)
+                domain = hetzner_dns.get_domain(file_name)
                 
                 # Try to get a zone ID; the zone may already exist
-                zone_id = hezner_dns.get_zone_id(domain)
+                zone_id = hetzner_dns.get_zone_id(domain)
                 
                 if zone_id == None: # Now we schould have a zone id; if not go on
-                    domain = hezner_dns.create_zone(domain)
+                    domain = hetzner_dns.create_zone(domain)
 
                 if zone_id == None: # Now we should have a zone id; if not, there is a problem in the DNS app.
                     self.logger.error("Could not create new zone")
                     continue # Continue to the next file
 
                 # Updating the zone data
-                hezner_dns.update_zone_from_file(zone_id, domain, file_name)
-                if not hezner_dns.update_zone_from_file(zone_id, domain, file_name):
+                hetzner_dns.update_zone_from_file(zone_id, domain, file_name)
+                if not hetzner_dns.update_zone_from_file(zone_id, domain, file_name):
                     # The log will be written within the method update_zone_from_file
                     # we just need to contiue to not update the database and can try it the next time
                     continue  # Continue to the next file
@@ -156,14 +156,14 @@ class ObserverHandler(FileSystemEventHandler):
             # Check if the file still exists on the file system
             if not os.path.exists(file_path): # File was deleted
                 # Getting domain from filename
-                domain = hezner_dns.get_domain(file_name[0])
+                domain = hetzner_dns.get_domain(file_name[0])
                 
                 # Seaching the zone id
-                zone_id = hezner_dns.get_zone_id(domain)
+                zone_id = hetzner_dns.get_zone_id(domain)
                 
                 if zone_id: # We found a zone id
                      # Deleting the zone id
-                    if not hezner_dns.delete_zone(domain):
+                    if not hetzner_dns.delete_zone(domain):
                         self.logger.error(f"Could not delete zone {domain} from Hetzner DNS.")
                         continue  # Continue to the next file
                 # It doesn't matter if we found a zone id, we will delete the file entry in the data
