@@ -22,13 +22,14 @@ else
   echo "Wget is already installed."
 fi
 
-if ! pip3 show watchdog | grep -q "watchdog"; then
+# Check and install WatchDog; We need to user a varible because pip3 show causing warnings
+watchdog_info=$(pip3 show watchdog)
+if [[ $watchdog_info == *Name:\ watchdog* ]]; then
+  echo "Watchdog is already installed."
+else
   echo "Watchdog is not installed. Installing it."
   pip3 install watchdog
-else
-  echo "Watchdog is already installed."
 fi
-
 
 # Create directories
 sudo mkdir -p /usr/local/bin/hetznerdns/
