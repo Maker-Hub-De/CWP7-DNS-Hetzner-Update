@@ -20,6 +20,8 @@ sudo mkdir -p /usr/local/bin/hetznerdns/modules/
 # Download python program from GitHub
 sudo wget -O /usr/local/bin/hetznerdns/hetznerDnsUpdate.py         https://raw.githubusercontent.com/Maker-Hub-De/CWP7-DNS-Hetzner-Update/raw/main/hetznerDnsUpdate.py
 sudo wget -O /usr/local/bin/hetznerdns/config.json                 https://raw.githubusercontent.com/Maker-Hub-De/CWP7-DNS-Hetzner-Update/main/config.json
+sudo wget -O /usr/local/bin/hetznerdns/configGet.py                https://raw.githubusercontent.com/Maker-Hub-De/CWP7-DNS-Hetzner-Update/main/configGet.py
+sudo wget -O /usr/local/bin/hetznerdns/configUpdate.py             https://raw.githubusercontent.com/Maker-Hub-De/CWP7-DNS-Hetzner-Update/main/configUpdate.py
 sudo wget -O /usr/local/bin/hetznerdns/modules/__init__.py         https://raw.githubusercontent.com/Maker-Hub-De/CWP7-DNS-Hetzner-Update/main/modules/__init__.py
 sudo wget -O /usr/local/bin/hetznerdns/modules/db_manager.py       https://raw.githubusercontent.com/Maker-Hub-De/CWP7-DNS-Hetzner-Update/main/modules/db_manager.py
 sudo wget -O /usr/local/bin/hetznerdns/modules/hetzner_dns.py      https://raw.githubusercontent.com/Maker-Hub-De/CWP7-DNS-Hetzner-Update/main/modules/hetzner_dns.py
@@ -28,6 +30,8 @@ sudo wget -O /usr/local/bin/hetznerdns/modules/observer_handler.py https://raw.g
 # Set permissions
 sudo chmod 900 /usr/local/bin/hetznerdns/hetznerDnsUpdate.py
 sudo chmod 700 /usr/local/bin/hetznerdns/config.json
+sudo chmod 705 /usr/local/bin/hetznerdns/configGet.py
+sudo chmod 705 /usr/local/bin/hetznerdns/configUpdate.py
 sudo chmod 700 /usr/local/bin/hetznerdns/modules/__init__.py
 sudo chmod 700 /usr/local/bin/hetznerdns/modules/db_manager.py
 sudo chmod 700 /usr/local/bin/hetznerdns/modules/hetzner_dns.py
