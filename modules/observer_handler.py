@@ -79,7 +79,7 @@ class ObserverHandler(FileSystemEventHandler):
                 # Updating the zone data
                 hezner_dns.update_zone_from_file(zone_id, domain, file_path)
                 # Insert into the database
-                if not self.db_manager.insert_file_info(file_name, current_check_time)
+                if not self.db_manager.insert_file_info(file_name, last_modified_file, current_check_time
                     self.logger.error("Could not insert file {file_name} in datagbase.")
                     continue # Continue to the next file
             # changes that younger then last check and the last check scould be at least 2 seconds in the past   
