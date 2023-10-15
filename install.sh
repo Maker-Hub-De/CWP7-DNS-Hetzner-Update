@@ -9,9 +9,9 @@ download_file() {
     if wget --spider "$url" 2>/dev/null; then
         echo "Downloading: $url"
         sudo wget -q -O "$target" "$url"
-    else {
+    else
         echo "URL not available: $url"
-    }
+    fi
 }
 
 # Check and install Wget
