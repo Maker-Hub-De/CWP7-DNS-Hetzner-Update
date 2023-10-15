@@ -92,7 +92,7 @@ class ObserverHandler(FileSystemEventHandler):
                 hezner_dns.update_zone_from_file(zone_id, domain, file_path)
                 # Insert into the database
                 if not self.db_manager.insert_file_info(file_name, last_modified_file, current_check_time
-                    self.logger.error("Could not insert file {file_name} in datagbase.")
+                    self.logger.error("Could not insert file {file_name} in database.")
                     continue # Continue to the next file
             # changes that younger then last check and the last check scould be at least 2 seconds in the past   
             elif last_modified_file > last_checked \
@@ -114,14 +114,14 @@ class ObserverHandler(FileSystemEventHandler):
                 hezner_dns.update_zone_from_file(zone_id, domain, file_name)
                 # Updating the database
                 if not self.db_manager.update_file_info(file_name, last_modified_file, current_check_time):
-                    self.logger.error("Could not update file {file_name} in datagbase.")
+                    self.logger.error("Could not update file {file_name} in database.")
                     continue # Continue to the next file
 
             else:
                 # Just update the check time
                 print("Just update the check time")      
                 if not self.db_manager.update_file_info(file_name, last_modified_file, current_check_time):
-                    self.logger.error("Could not update file {file_name} in datagbase.")
+                    self.logger.error("Could not update file {file_name} in database.")
                     continue # Continue to the next file
 
         # Now checking the files in the database which weren't updated
