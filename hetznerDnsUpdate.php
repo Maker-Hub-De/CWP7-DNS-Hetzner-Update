@@ -7,7 +7,6 @@ if ( !isset( $include_path ) )
 }
 
 $strConfig = shell_exec('/usr/local/bin/hetznerdns/configGet.py');
-$strConfig = fread($objFileHandler, filesize('/usr/local/bin/hetznerdns/config.json'));
 $objConfig = json_decode($strConfig);
 
 /*$objFileHandler = fopen('/usr/local/bin/hetznerdns/config.json', 'r');
