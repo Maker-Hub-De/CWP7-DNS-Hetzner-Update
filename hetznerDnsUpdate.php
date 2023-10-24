@@ -6,10 +6,10 @@ if ( !isset( $include_path ) )
     exit( );
 }
 
-$objFileHandler = fopen('/usr/local/bin/hetzerdns/config.json', 'r');
+$objFileHandler = fopen('/usr/local/bin/hetznerdns/config.json', 'r');
 
 if ($objFileHandler !== false) {
-  $strConfig = fread($objFileHandler, filesize('/usr/local/bin/hetzerdns/config.json'));
+  $strConfig = fread($objFileHandler, filesize('/usr/local/bin/hetznerdns/config.json'));
   $objConfig = json_decode($strConfig);
   fclose($objFileHandler); // Wichtig: Die Datei nach dem Lesen schließen
 }
