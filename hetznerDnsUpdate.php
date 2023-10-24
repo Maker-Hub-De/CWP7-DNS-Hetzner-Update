@@ -6,13 +6,17 @@ if ( !isset( $include_path ) )
     exit( );
 }
 
-$objFileHandler = fopen('/usr/local/bin/hetznerdns/config.json', 'r');
+$strConfig = shell_exec('/usr/local/bin/hetznerdns/configGet.py');
+$strConfig = fread($objFileHandler, filesize('/usr/local/bin/hetznerdns/config.json'));
+$objConfig = json_decode($strConfig);
+
+/*$objFileHandler = fopen('/usr/local/bin/hetznerdns/config.json', 'r');
 
 if ($objFileHandler !== false) {
   $strConfig = fread($objFileHandler, filesize('/usr/local/bin/hetznerdns/config.json'));
   $objConfig = json_decode($strConfig);
   fclose($objFileHandler); // Wichtig: Die Datei nach dem Lesen schließen
-}
+}*/
 ?>
 
 Hetzner DNS Zone update<br>
