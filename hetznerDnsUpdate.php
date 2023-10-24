@@ -25,7 +25,7 @@ Hetzner DNS Zone update<br>
       <div class="col-lg-10 col-md-9">
         <div class="toggle-custom toggle-inline">
           <label class="toggle tip" data-original-title="Status" data-on="ON" data-off="OFF">
-            <input type="checkbox" class="" id="checkbox-toggle" checked="<?php if (isset($objConfig) && property_exists($objConfig, 'apiToken') && $objConfig->active == true) echo 'checked'; ?>" name="checkbox-toggle">
+            <input type="checkbox" class="" id="checkbox-toggle" <?php if (isset($objConfig) && property_exists($objConfig, 'active') && $objConfig->active == true) echo 'checked'; ?> name="checkbox-toggle">
             <span class="button-checkbox"></span>
           </label>
         </div>
